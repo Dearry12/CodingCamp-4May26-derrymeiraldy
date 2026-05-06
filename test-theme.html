@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Theme Manager Test</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body class="theme-light">
+    <div class="container">
+        <header>
+            <h1>Theme Manager Test</h1>
+            <button id="theme-toggle" class="theme-toggle" aria-label="Toggle theme">
+                <span class="theme-icon"></span>
+            </button>
+        </header>
+
+        <main>
+            <section class="greeting-section">
+                <h2>Testing Theme Toggle</h2>
+                <p>Click the theme toggle button in the header to switch between light and dark themes.</p>
+                <p>The theme preference should persist when you reload the page.</p>
+                <p id="current-theme">Current theme: <span id="theme-display">light</span></p>
+            </section>
+        </main>
+    </div>
+
+    <script type="module">
+        import { StorageManager } from './js/storage-manager.js';
+        import { ThemeManager } from './js/theme-manager.js';
+
+        // Initialize the app when DOM is ready
+        document.addEventListener('DOMContentLoaded', () => {
+            // Create storage manager instance
+            const storage = new StorageManager();
+            
+            // Create and initialize theme manager
+            const themeManager = new ThemeManager(storage);
+            themeManager.init();
+            
+            // Update display
+            const updateDisplay = () => {
+                document.getElementById('theme-display').textContent = themeManager.getCurrentTheme();
+            };
+            updateDisplay();
+            
+            // Add listener to update display on toggle
+            document.getElementById('theme-toggle').addEventListener('click', () => {
+                setTimeout(updateDisplay, 100);
+            });
+            
+            // Log initialization
+            console.log('Theme Manager Test initialized');
+            console.log('Storage available:', storage.isAvailable());
+            console.log('Current theme:', themeManager.getCurrentTheme());
+        });
+    </script>
+</body>
+</html>
