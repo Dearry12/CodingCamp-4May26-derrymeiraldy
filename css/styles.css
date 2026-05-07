@@ -429,6 +429,176 @@ section h2 {
   background: var(--bg-secondary);
 }
 
+/* Quick Links Section */
+.quick-links-section {
+  background: var(--bg-secondary);
+}
+
+.link-controls {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+}
+
+.link-input {
+  flex: 1;
+  min-width: 200px;
+  padding: 0.875rem 1.25rem;
+  font-size: 1.125rem;
+  border: 2px solid var(--border);
+  border-radius: 12px;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  transition: all 0.3s ease;
+  font-weight: 500;
+}
+
+.link-input:hover {
+  border-color: var(--accent);
+}
+
+.link-input:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 4px var(--focus-ring);
+}
+
+.link-input::placeholder {
+  color: var(--text-muted);
+}
+
+.btn-add-link {
+  padding: 0.875rem 2rem;
+  font-size: 1.125rem;
+  font-weight: 600;
+  background: linear-gradient(135deg, var(--accent) 0%, var(--accent-hover) 100%);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: var(--shadow-md);
+  white-space: nowrap;
+}
+
+.btn-add-link:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-lg);
+}
+
+.btn-add-link:active {
+  transform: translateY(-1px);
+}
+
+.btn-add-link:focus {
+  outline: none;
+  box-shadow: 0 0 0 4px var(--focus-ring);
+}
+
+.quick-links-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+
+.empty-message {
+  grid-column: 1 / -1;
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 1rem;
+  padding: 2rem;
+  font-style: italic;
+}
+
+.quick-link-item {
+  position: relative;
+  display: flex;
+  align-items: center;
+  background: var(--bg-primary);
+  border: 2px solid var(--border);
+  border-radius: 12px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow: hidden;
+  animation: slideIn 0.3s ease;
+}
+
+.quick-link-item:hover {
+  border-color: var(--accent);
+  box-shadow: var(--shadow-md);
+  transform: translateY(-4px);
+}
+
+.quick-link-button {
+  flex: 1;
+  padding: 1.25rem;
+  text-decoration: none;
+  color: var(--text-primary);
+  font-size: 1.125rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  transition: all 0.3s ease;
+  word-break: break-word;
+  line-height: 1.4;
+}
+
+.quick-link-button:hover {
+  color: var(--accent);
+  background: var(--accent-light);
+}
+
+.quick-link-button:focus {
+  outline: none;
+  box-shadow: inset 0 0 0 3px var(--focus-ring);
+}
+
+.quick-link-delete {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  background: var(--error);
+  color: white;
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 1.5rem;
+  font-weight: 700;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: var(--shadow-sm);
+  opacity: 0;
+}
+
+.quick-link-item:hover .quick-link-delete {
+  opacity: 1;
+}
+
+.quick-link-delete:hover {
+  transform: scale(1.15);
+  box-shadow: var(--shadow-md);
+  background: #c82333;
+}
+
+.quick-link-delete:active {
+  transform: scale(0.95);
+}
+
+.quick-link-delete:focus {
+  outline: none;
+  opacity: 1;
+  box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.25);
+}
+
 .task-controls {
   display: flex;
   gap: 1rem;
@@ -736,6 +906,23 @@ section h2 {
 
   .btn-add {
     width: 100%;
+  }
+
+  .link-controls {
+    flex-direction: column;
+  }
+
+  .link-input {
+    width: 100%;
+    min-width: 100%;
+  }
+
+  .btn-add-link {
+    width: 100%;
+  }
+
+  .quick-links-container {
+    grid-template-columns: 1fr;
   }
 
   .sort-controls {

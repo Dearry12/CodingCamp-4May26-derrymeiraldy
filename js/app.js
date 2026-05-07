@@ -583,6 +583,166 @@ class TaskSorter {
 }
 
 // ============================================================================
+// QUICK LINKS MANAGER
+// ============================================================================
+
+/**
+ * Quick Links Manager
+ * Manages favorite website links with Local Storage persistence
+ */
+class QuickLinksManager {
+  constructor(storageManager) {
+    this.storageManager = storageManager;
+    this.links = [];
+    this.storageKey = 'quickLinks';
+  }
+
+  init() {
+    const savedLinks = this.storageManager.get(this.storageKey);
+    if (savedLinks && Array.isArray(savedLinks)) {
+      this.links = savedLinks;
+    } else {
+      this.links = [];
+    }
+
+    this.render();
+  }
+
+  addLink(name, url) {
+    // Validate inputs
+    if (!name || typeof name !== 'string' || name.trim() === '') {
+      return {
+        success: false,
+        error: 'Link name cannot be empty'
+      };
+    }
+
+    if (!url || typeof url !== 'string' || url.trim() === '') {
+      return {
+        success: false,
+        error: 'URL cannot be empty'
+      };
+    }
+
+    // Validate URL format
+    if (!this.isValidUrl(url)) {
+      return {
+        success: false,
+        error: 'Please enter a valid URL (e.g., https://example.com)'
+      };
+    }
+
+    // Check for duplicate names
+    const normalizedName = name.trim().toLowerCase();
+    const isDuplicate = this.links.some(link => 
+      link.name.toLowerCase() === normalizedName
+    );
+
+    if (isDuplicate) {
+      return {
+        success: false,
+        error: 'A link with this name already exists'
+      };
+    }
+
+    const newLink = {
+      id: Date.now().toString(),
+      name: name.trim(),
+      url: this.normalizeUrl(url.trim()),
+      createdAt: Date.now()
+    };
+
+    this.links.push(newLink);
+    this.storageManager.set(this.storageKey, this.links);
+    this.render();
+
+    return {
+      success: true,
+      error: null
+    };
+  }
+
+  deleteLink(linkId) {
+    this.links = this.links.filter(link => link.id !== linkId);
+    this.storageManager.set(this.storageKey, this.links);
+    this.render();
+  }
+
+  getLinks() {
+    return this.links;
+  }
+
+  isValidUrl(url) {
+    try {
+      const urlObj = new URL(url.startsWith('http') ? url : `https://${url}`);
+      return urlObj.protocol === 'http:' || urlObj.protocol === 'https:';
+    } catch (e) {
+      return false;
+    }
+  }
+
+  normalizeUrl(url) {
+    // Add https:// if no protocol specified
+    if (!url.startsWith('http://') && !url.startsWith('https://')) {
+      return `https://${url}`;
+    }
+    return url;
+  }
+
+  render() {
+    const linksContainer = document.getElementById('quick-links-container');
+    
+    if (!linksContainer) {
+      console.error('Quick links container not found');
+      return;
+    }
+
+    linksContainer.innerHTML = '';
+
+    if (this.links.length === 0) {
+      const emptyMessage = document.createElement('p');
+      emptyMessage.className = 'empty-message';
+      emptyMessage.textContent = 'No quick links yet. Add your favorite websites!';
+      linksContainer.appendChild(emptyMessage);
+      return;
+    }
+
+    const fragment = document.createDocumentFragment();
+
+    this.links.forEach(link => {
+      const linkButton = document.createElement('div');
+      linkButton.className = 'quick-link-item';
+      linkButton.dataset.linkId = link.id;
+
+      const linkAnchor = document.createElement('a');
+      linkAnchor.href = link.url;
+      linkAnchor.target = '_blank';
+      linkAnchor.rel = 'noopener noreferrer';
+      linkAnchor.className = 'quick-link-button';
+      linkAnchor.textContent = link.name;
+      linkAnchor.setAttribute('aria-label', `Open ${link.name} in new tab`);
+
+      const deleteButton = document.createElement('button');
+      deleteButton.className = 'quick-link-delete';
+      deleteButton.textContent = '×';
+      deleteButton.setAttribute('aria-label', `Delete ${link.name}`);
+      
+      deleteButton.addEventListener('click', (e) => {
+        e.stopPropagation();
+        this.deleteLink(link.id);
+      });
+
+      linkButton.appendChild(linkAnchor);
+      linkButton.appendChild(deleteButton);
+
+      fragment.appendChild(linkButton);
+    });
+
+    linksContainer.appendChild(fragment);
+  }
+}
+
+// ============================================================================
 // TASK MANAGER
 // ============================================================================
 
@@ -739,7 +899,10 @@ function initApp() {
     
     taskManager.render();
     
-    attachEventListeners(taskManager, taskSorter);
+    const quickLinksManager = new QuickLinksManager(storage);
+    quickLinksManager.init();
+    
+    attachEventListeners(taskManager, taskSorter, quickLinksManager);
     
     // Initialize clock
     updateClock();
@@ -792,7 +955,7 @@ function updateClock() {
 /**
  * Attach event listeners for all UI controls
  */
-function attachEventListeners(taskManager, taskSorter) {
+function attachEventListeners(taskManager, taskSorter, quickLinksManager) {
   const taskAddButton = document.getElementById('task-add');
   const taskInput = document.getElementById('task-input');
   const taskError = document.getElementById('task-error');
@@ -820,6 +983,32 @@ function attachEventListeners(taskManager, taskSorter) {
       taskSorter.setSortPreference(sortOption);
       taskManager.applySorting();
       taskManager.render();
+    });
+  }
+
+  // Quick Links event listeners
+  const linkAddButton = document.getElementById('link-add');
+  const linkNameInput = document.getElementById('link-name-input');
+  const linkUrlInput = document.getElementById('link-url-input');
+  const linkError = document.getElementById('link-error');
+
+  if (linkAddButton && linkNameInput && linkUrlInput && linkError) {
+    linkAddButton.addEventListener('click', () => {
+      handleAddLink(quickLinksManager, linkNameInput, linkUrlInput, linkError);
+    });
+
+    linkUrlInput.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') {
+        handleAddLink(quickLinksManager, linkNameInput, linkUrlInput, linkError);
+      }
+    });
+
+    linkNameInput.addEventListener('input', () => {
+      clearLinkError(linkError);
+    });
+
+    linkUrlInput.addEventListener('input', () => {
+      clearLinkError(linkError);
     });
   }
 }
@@ -860,6 +1049,45 @@ function clearTaskError(taskError) {
   if (taskError) {
     taskError.textContent = '';
     taskError.style.display = 'none';
+  }
+}
+
+/**
+ * Handle adding a new quick link
+ */
+function handleAddLink(quickLinksManager, linkNameInput, linkUrlInput, linkError) {
+  const linkName = linkNameInput.value;
+  const linkUrl = linkUrlInput.value;
+
+  clearLinkError(linkError);
+
+  const result = quickLinksManager.addLink(linkName, linkUrl);
+
+  if (result.success) {
+    linkNameInput.value = '';
+    linkUrlInput.value = '';
+  } else {
+    showLinkError(linkError, result.error || 'Unable to add link');
+  }
+}
+
+/**
+ * Display link error message
+ */
+function showLinkError(linkError, message) {
+  if (linkError) {
+    linkError.textContent = message;
+    linkError.style.display = 'inline';
+  }
+}
+
+/**
+ * Clear link error message
+ */
+function clearLinkError(linkError) {
+  if (linkError) {
+    linkError.textContent = '';
+    linkError.style.display = 'none';
   }
 }
 

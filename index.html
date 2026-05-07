@@ -80,6 +80,29 @@
             </section>
         </main>
 
+                    <!-- Quick Links Section -->
+            <section class="quick-links-section">
+                <h2>🔗 Quick Links</h2>
+                <div class="link-controls">
+                    <input 
+                        type="text" 
+                        id="link-name-input" 
+                        class="link-input" 
+                        placeholder="Link name (e.g., Gmail)"
+                        maxlength="50"
+                    />
+                    <input 
+                        type="text" 
+                        id="link-url-input" 
+                        class="link-input" 
+                        placeholder="URL (e.g., https://gmail.com)"
+                    />
+                    <button id="link-add" class="btn-add-link">Add Link</button>
+                </div>
+                <span id="link-error" class="error-message"></span>
+                <div id="quick-links-container" class="quick-links-container"></div>
+            </section>
+
         <!-- Storage Warning Banner -->
         <div id="storage-warning" class="storage-warning hidden">
             Storage unavailable. Your data will not be saved.
